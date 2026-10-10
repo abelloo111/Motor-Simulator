@@ -82,7 +82,8 @@ export default function EngineCanvas({ state, config }: Props) {
       for (let i = 0; i < count; i++) {
         const cx = areaLeft + spacing * (i + 0.5);
         cylinderCenters.push(cx);
-        const phaseDegrees = (s.cycleAngle + i * (720 / count)) % 720;
+        const firingPosition = firingOrder.indexOf(i + 1);
+        const phaseDegrees = (s.cycleAngle + Math.max(0, firingPosition) * (720 / count)) % 720;
         const angle = phaseDegrees * Math.PI / 180;
         const pistonY = cylinderTop + 26 + (1 - Math.cos(angle)) * (strokePx / 2);
         const pinX = cx + Math.sin(angle) * crankR;
