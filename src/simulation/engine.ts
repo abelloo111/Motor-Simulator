@@ -37,7 +37,7 @@ export class EngineSimulation {
     if (controls.ignition && !this.running) { this.running = true; this.rpm = Math.max(this.rpm, 340); }
     if (this.running) {
       const idleAssist = Math.max(0, (IDLE_RPM - this.rpm) / IDLE_RPM) * 0.44;
-      const combustion = this.filteredThrottle * 1.28 + idleAssist;
+      const combustion = 0.48 + this.filteredThrottle * 1.28 + idleAssist;
       const drag = 0.18 + this.rpm / 4200 + controls.load * 0.8;
       this.rpm += (combustion - drag) * 2450 * dt;
       if (!controls.ignition) this.rpm -= (950 + this.rpm * 0.6) * dt;
