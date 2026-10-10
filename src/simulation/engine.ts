@@ -44,7 +44,7 @@ export class EngineSimulation {
       this.rpm = Math.max(0, Math.min(MAX_RPM, this.rpm));
       if (this.rpm <= 1 && !controls.ignition) this.running = false;
       this.cycleAngle = (this.cycleAngle + this.rpm / 60 * 360 * dt) % 720;
-      this.temperature += (25 + this.filteredThrottle * 170 - (this.temperature - 22) * 0.05) * dt;
+      this.temperature += (3 + this.filteredThrottle * 7 - (this.temperature - 22) * 0.04) * dt;
     } else {
       this.rpm = 0;
       this.temperature += (22 - this.temperature) * dt * 0.015;
