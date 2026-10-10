@@ -167,19 +167,28 @@ export class EngineAudio {
     const rpm = Math.max(0, this.lastRpm);
     if (rpm < 140) return;
 
-    const period = 120 / Math.max(rpm * this.lastCylinders, 140);
-    if (this.nextFireTime < now - period) this.nextFireTime = now + 0.003;
-    const horizon = now + 0.075;
+    const firingHz = rpm * this.lastCylinders / 120;
+    const period = 1 / Math.max(firingHz, 140 / 120);
+    // Detailed transient layers allocate several Web Audio nodes per event.
+    // Above ~220 events/sec, render every Nth transient while the continuous
+    // engine tone still tracks the full firing frequency. This prevents mobile
+    // browsers from falling behind and avoids the old 24-event scheduler cap
+    // repeatedly dropping combustion events at high RPM / cylinder counts.
+    const detailStride = Math.max(1, Math.ceil(firingHz / 220));
+    const scheduledPeriod = period * detailStride;
+    if (this.nextFireTime < now - scheduledPeriod) this.nextFireTime = now + 0.003;
+    const horizon = now + 0.05;
     let guard = 0;
-    while (this.nextFireTime < horizon && guard++ < 24) {
-      const cylinder = this.lastFiringOrder[this.fireIndex % this.lastFiringOrder.length] ?? 1;
-      this.fire(this.nextFireTime, this.lastThrottle, this.lastLoad, rpm, cylinder);
-      this.fireIndex++;
-      this.nextFireTime += period;
+    while (this.nextFireTime < horizon && guard++ < 32) {
+      const orderLength = this.lastFiringOrder.length;
+      const cylinder = this.lastFiringOrder[this.fireIndex % orderLength] ?? 1;
+      this.fire(this.nextFireTime, this.lastThrottle, this.lastLoad, rpm, cylinder, Math.sqrt(detailStride));
+      this.fireIndex = (this.fireIndex + detailStride) % orderLength;
+      this.nextFireTime += scheduledPeriod;
     }
   }
 
-  private fire(at: number, throttle: number, load: number, rpm: number, cylinder: number): void {
+  private fire(at: number, throttle: number, load: number, rpm: number, cylinder: number, detailCompensation = 1): void {
     const ctx = this.context;
     if (!ctx || !this.master || !this.noiseBuffer) return;
 
