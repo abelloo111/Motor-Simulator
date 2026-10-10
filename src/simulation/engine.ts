@@ -214,7 +214,7 @@ export class EngineSimulation {
       const clutch = clamp(controls.clutch, 0, 1);
       if (gear !== 0 && clutch > 0.01) {
         const wheelCircumference = 2 * Math.PI * (this.config.wheelRadiusMm / 1000);
-        const wheelRpm = this.vehicleSpeed / wheelCircumference * 60;
+        const wheelRpm = Math.abs(this.vehicleSpeed) / wheelCircumference * 60;
         const targetRpm = wheelRpm * ratio * this.config.finalDrive;
         const coupling = clutch * clamp(this.vehicleSpeed / 3.5, 0, 1);
         this.rpm += (targetRpm - this.rpm) * clamp(dt * coupling * 2.8, 0, 0.22);
@@ -232,18 +232,20 @@ export class EngineSimulation {
         const ratioForForce = gear < 0 ? 3.2 : (this.config.gearRatios[gear - 1] ?? 1);
         const force = availableTorque * ratioForForce * this.config.finalDrive * 0.86 * clutch /
           Math.max(0.22, this.config.wheelRadiusMm / 1000);
-        const rollingResistance = 95 + this.vehicleSpeed * 18 + controls.load * 700;
-        const acceleration = (force - rollingResistance) / this.config.vehicleMassKg;
-        this.vehicleSpeed = Math.max(0, Math.min(66.7, this.vehicleSpeed + acceleration * dt));
+        const direction = gear < 0 ? -1 : 1;
+        const rollingResistance = Math.sign(this.vehicleSpeed) * (95 + Math.abs(this.vehicleSpeed) * 18);
+        const loadDrag = Math.sign(this.vehicleSpeed || direction) * controls.load * 180;
+        const acceleration = (direction * force - rollingResistance - loadDrag) / this.config.vehicleMassKg;
+        this.vehicleSpeed = Math.max(-20, Math.min(66.7, this.vehicleSpeed + acceleration * dt));
       } else {
-        this.vehicleSpeed = Math.max(0, this.vehicleSpeed - (0.035 + this.vehicleSpeed * 0.018) * dt);
+        this.vehicleSpeed *= Math.exp(-dt * 0.18);
       }
 
       this.rpm = clamp(this.rpm, 0, this.config.redlineRpm);
       if (this.rpm <= 5 && !controls.ignition) {
         this.running = false;
         this.rpm = 0;
-      } else if (controls.ignition && this.rpm < this.config.idleRpm * 0.78 && controls.gear !== 0 && controls.clutch > 0.85 && this.vehicleSpeed < 0.8) {
+      } else if (controls.ignition && this.rpm < this.config.idleRpm * 0.78 && controls.gear !== 0 && controls.clutch > 0.85 && Math.abs(this.vehicleSpeed) < 0.8) {
         // A fully engaged clutch at a standstill can stall the engine.
         this.rpm = Math.max(0, this.rpm - dt * 260);
         if (this.rpm < 5) this.running = false;
