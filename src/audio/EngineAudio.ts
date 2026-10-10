@@ -19,6 +19,7 @@ export class EngineAudio {
   private lastRpm = 0;
   private lastThrottle = 0;
   private muted = false;
+  private engineActive = false;
 
   async start(state: EngineState): Promise<void> {
     if (this.context) { this.setMuted(false); return; }
@@ -100,6 +101,7 @@ export class EngineAudio {
     const rpm = Math.max(0, state.rpm);
     this.lastRpm = rpm;
     this.lastThrottle = state.throttle;
+    this.engineActive = state.ignition && rpm > 60;
     const smooth = (param: AudioParam, value: number, tau = 0.08) => {
       param.cancelScheduledValues(now);
       param.setTargetAtTime(value, now, tau);
@@ -109,13 +111,13 @@ export class EngineAudio {
     if (this.exhaustFilter) smooth(this.exhaustFilter.frequency, 220 + state.throttle * 1050 + rpm * 0.055);
     if (this.intakeFilter) smooth(this.intakeFilter.frequency, 350 + state.throttle * 2100 + rpm * 0.08);
     if (this.mechanicalGain) smooth(this.mechanicalGain.gain, 0.018 + Math.min(rpm / 6800, 1) * 0.055);
-    if (this.master) smooth(this.master.gain, this.muted ? 0 : 0.24 + state.throttle * 0.2, 0.09);
+    if (this.master) smooth(this.master.gain, this.muted || !this.engineActive ? 0 : 0.24 + state.throttle * 0.2, 0.09);
   }
 
   setMuted(value: boolean): void {
     this.muted = value;
     if (this.context && this.master) {
-      this.master.gain.setTargetAtTime(value ? 0 : 0.24 + this.lastThrottle * 0.2, this.context.currentTime, 0.04);
+      this.master.gain.setTargetAtTime(value || !this.engineActive ? 0 : 0.24 + this.lastThrottle * 0.2, this.context.currentTime, 0.04);
     }
   }
   toggleMute(): boolean { this.setMuted(!this.muted); return this.muted; }
@@ -123,7 +125,7 @@ export class EngineAudio {
 
   private scheduleCombustions(): void {
     const ctx = this.context;
-    if (!ctx) return;
+    if (!ctx || !this.engineActive) return;
     const now = ctx.currentTime;
     const rpm = Math.max(0, this.lastRpm);
     if (rpm < 140) return;
@@ -150,11 +152,24 @@ export class EngineAudio {
     const high = ctx.createBiquadFilter();
     high.type = "highpass";
     high.frequency.value = 45;
+    const resonance = ctx.createBiquadFilter();
+    resonance.type = "peaking";
+    resonance.frequency.setValueAtTime(112 + throttle * 24, at);
+    resonance.Q.value = 1.15;
+    resonance.gain.value = 5.5;
+    const saturation = ctx.createWaveShaper();
+    const curve = new Float32Array(256);
+    for (let i = 0; i < curve.length; i++) {
+      const x = (i * 2) / (curve.length - 1) - 1;
+      curve[i] = Math.tanh(x * 2.2);
+    }
+    saturation.curve = curve;
+    saturation.oversample = "2x";
     const env = ctx.createGain();
     env.gain.setValueAtTime(0.0001, at);
     env.gain.exponentialRampToValueAtTime(0.18 * strength, at + 0.004);
     env.gain.exponentialRampToValueAtTime(0.0001, at + 0.115 + throttle * 0.09);
-    transient.connect(low); low.connect(high); high.connect(env); env.connect(this.master);
+    transient.connect(low); low.connect(high); high.connect(resonance); resonance.connect(saturation); saturation.connect(env); env.connect(this.master);
     transient.start(at); transient.stop(at + 0.3);
 
     const body = ctx.createOscillator();
