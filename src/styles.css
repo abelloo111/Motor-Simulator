@@ -221,3 +221,63 @@ h1 em { color: var(--orange); font-style: normal; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition-duration: .01ms !important; animation-duration: .01ms !important; }
 }
+
+/* Configurable engine + manual transmission */
+.icon-button.settings-active { color: #ffad80; border-color: #68422f; background: #251a16; }
+.config-panel { margin-top: 17px; padding: 22px; border: 1px solid #303b48; border-radius: 10px; background: linear-gradient(145deg, #141d27, #0e141b); }
+.config-panel-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; margin-bottom: 20px; }
+.config-panel-heading h2 { margin: 6px 0 0; font-size: 16px; color: #e6edf5; }
+.config-panel-heading p { margin: 7px 0 0; color: #8694a4; font-size: 11px; line-height: 1.6; }
+.config-panel-heading .quiet-button { flex: 0 0 auto; }
+.config-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+.config-field { min-width: 0; display: flex; flex-direction: column; gap: 7px; color: #aab6c5; font-size: 10px; }
+.config-field > span { color: #9ba9b9; font: 9px 'DM Mono', monospace; letter-spacing: .35px; text-transform: uppercase; }
+.config-field input, .config-field select { width: 100%; min-width: 0; height: 37px; padding: 0 10px; color: #e1e8f0; background: #0c1219; border: 1px solid #303d4b; border-radius: 6px; outline: none; font: 12px 'DM Mono', monospace; }
+.config-field input:focus, .config-field select:focus { border-color: #bd7048; box-shadow: 0 0 0 2px rgba(255,125,67,.1); }
+.config-field small { color: #657384; font-size: 9px; line-height: 1.45; }
+.config-field-wide { grid-column: span 2; }
+.transmission-card { margin: 0 17px 16px; padding: 14px; border: 1px solid #2d3a47; border-radius: 8px; background: linear-gradient(145deg, #111b25, #0d141b); }
+.transmission-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding-bottom: 13px; border-bottom: 1px solid #27323e; }
+.transmission-top > div:first-child { min-width: 0; display: grid; grid-template-columns: 1fr auto; align-items: center; column-gap: 9px; }
+.micro-label { grid-column: 1 / -1; display: block; color: #748396; font: 8px 'DM Mono', monospace; letter-spacing: .65px; }
+.gear-display { display: block; color: #ffab7b; font: 700 38px/.95 'Barlow Condensed', sans-serif; margin-top: 6px; }
+.gear-name { color: #8694a4; font: 8px 'DM Mono', monospace; letter-spacing: .3px; margin-top: 5px; }
+.speed-readout { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; min-width: 58px; }
+.speed-readout strong { color: #e3ebf4; font: 600 27px 'Barlow Condensed', sans-serif; font-variant-numeric: tabular-nums; }
+.speed-readout span { color: #6e7d8e; font: 8px 'DM Mono', monospace; }
+.gear-controls { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; padding: 12px 0 14px; }
+.gear-shift-button { min-height: 36px; display: flex; align-items: center; justify-content: center; gap: 6px; border: 1px solid #394756; border-radius: 5px; background: #1a2530; color: #bfcbd8; font: 9px 'DM Mono', monospace; letter-spacing: .2px; }
+.gear-shift-button:hover:not(:disabled) { border-color: #a96340; color: #ffbd96; background: #251b17; }
+.gear-shift-button:disabled { opacity: .35; cursor: not-allowed; }
+.clutch-heading { margin-bottom: 12px; }
+.clutch-heading label { font-size: 11px; }
+.range.clutch-range { background: linear-gradient(to right, var(--blue) 0%, var(--blue) var(--range-progress), #303b48 var(--range-progress), #303b48 100%); }
+.range.clutch-range::-webkit-slider-thumb { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(80,185,231,.12); }
+.range.clutch-range::-moz-range-thumb { border-color: var(--blue); }
+.gear-detail { display: flex; align-items: center; gap: 6px; margin-top: 13px; padding-top: 11px; border-top: 1px solid #25313d; color: #778698; font-size: 9px; }
+.gear-detail b { color: #c5d0dc; font: 10px 'DM Mono', monospace; margin-right: auto; }
+.gear-detail b:last-child { margin-right: 0; }
+.gear-help { margin: 10px 0 0; color: #6f7e8f; font-size: 9px; line-height: 1.55; }
+.transmission-card .range-captions { margin-top: 8px; }
+.transmission-card .control-heading strong { font-size: 14px; }
+
+@media (max-width: 1080px) {
+  .config-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .transmission-card { margin-left: 13px; margin-right: 13px; }
+}
+@media (max-width: 760px) {
+  .config-panel { padding: 16px; margin-top: 12px; }
+  .config-panel-heading { gap: 12px; }
+  .config-panel-heading h2 { font-size: 14px; }
+  .config-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 10px; }
+  .config-field-wide { grid-column: span 2; }
+  .config-panel-heading .quiet-button { padding: 8px; font-size: 9px; }
+  .transmission-card { margin-left: 14px; margin-right: 14px; }
+}
+@media (max-width: 400px) {
+  .config-panel { padding: 12px; }
+  .config-panel-heading { flex-direction: column; }
+  .config-panel-heading .quiet-button { align-self: flex-start; }
+  .config-field input, .config-field select { padding: 0 7px; font-size: 11px; }
+  .transmission-card { margin-left: 11px; margin-right: 11px; padding: 11px; }
+}
