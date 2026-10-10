@@ -62,8 +62,8 @@ export default function EngineCanvas({ state }: Props) {
       }
       roundRect(x - 19, top - 24, boreW + 38, 24, 5, "#424f5f", "#7f8c9b");
       const valves: [number, string, boolean][] = [
-        [x + 28, "#38bdf8", s.cycleAngle > 175 && s.cycleAngle < 355],
-        [x + boreW - 28, "#fb923c", s.cycleAngle > 360 && s.cycleAngle < 540],
+        [x + 28, "#38bdf8", s.cycleAngle >= 360 && s.cycleAngle < 540],
+        [x + boreW - 28, "#fb923c", s.cycleAngle >= 180 && s.cycleAngle < 360],
       ];
       for (const [vx, color, open] of valves) {
         ctx.strokeStyle = "#97a3b3"; ctx.lineWidth = 4;
