@@ -7,7 +7,7 @@ import EngineCanvas from "./components/EngineCanvas";
 import { EngineAudio } from "./audio/EngineAudio";
 import { EngineSimulation, IDLE_SPEED, RPM_LIMIT, type EngineControls, type EngineState } from "./simulation/engine";
 
-const initialControls: EngineControls = { throttle: 0.12, load: 0.18, ignition: false };
+const initialControls: EngineControls = { throttle: 0.04, load: 0.18, ignition: false };
 const initialState: EngineState = {
   rpm: 0, torque: 0, power: 0, throttle: 0, load: initialControls.load,
   ignition: false, cycleAngle: 0, temperature: 22,
@@ -126,9 +126,9 @@ export default function App() {
         </div>
         <div className="cycle-strip">
           {["Admisión", "Compresión", "Expansión", "Escape"].map((phase, i) => {
-            const active = (i === 0 && state.cycleAngle >= 180 && state.cycleAngle < 360) ||
+            const active = (i === 0 && state.cycleAngle >= 360 && state.cycleAngle < 540) ||
               (i === 1 && state.cycleAngle >= 540) || (i === 2 && state.cycleAngle < 180) ||
-              (i === 3 && state.cycleAngle >= 360 && state.cycleAngle < 540);
+              (i === 3 && state.cycleAngle >= 180 && state.cycleAngle < 360);
             return <div key={phase} className={"cycle-step " + (active && controls.ignition ? "active" : "")}><span>0{i + 1}</span><b>{phase}</b></div>;
           })}
         </div>
