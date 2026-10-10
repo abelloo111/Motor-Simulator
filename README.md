@@ -20,6 +20,10 @@ Laboratorio interactivo de mecánica de motores. El primer prototipo se centra e
 - Carga: introduce una carga simplificada sobre el motor.
 - Activar sonido: activa o silencia las capas de audio.
 
+## Instalar como aplicación
+
+El proyecto incluye un manifest y un service worker básicos. Después de desplegarlo bajo HTTPS, los navegadores compatibles pueden ofrecer la opción de instalar Motor Simulator como aplicación de escritorio. El shell principal se guarda para una disponibilidad offline básica; las funciones que dependan de recursos no almacenados pueden requerir conexión la primera vez.
+
 ## Sonido
 El prototipo genera audio mediante Web Audio API: pulsos temporizados de combustión, resonancia grave de escape, ruido filtrado de admisión, armónicos mecánicos y compresión dinámica. El tono se adapta al régimen y la textura responde al acelerador.
 
