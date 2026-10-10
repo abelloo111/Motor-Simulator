@@ -1,13 +1,12 @@
 import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
 import {
   Activity, AudioLines, Gauge, RotateCcw, Settings2, Volume2, VolumeX,
-  Zap, Flame, ChevronDown, Power, Waves, ChevronUp, ChevronDown as ChevronDownIcon,
-  Settings, Cog, GaugeCircle,
+  Zap, Flame, Power, Waves, ChevronUp, ChevronDown as ChevronDownIcon, Cog,
 } from "lucide-react";
 import EngineCanvas from "./components/EngineCanvas";
 import { EngineAudio } from "./audio/EngineAudio";
 import {
-  DEFAULT_ENGINE_CONFIG, EngineSimulation, defaultFiringOrder, formatEngineLayout,
+  DEFAULT_ENGINE_CONFIG, EngineSimulation, defaultFiringOrder,
   getEngineDisplacementCc, normalizeEngineConfig, type EngineConfig, type EngineControls,
   type EngineLayout, type EngineState,
 } from "./simulation/engine";
