@@ -15,6 +15,7 @@ export class EngineAudio {
   private intakeFilter: BiquadFilterNode | null = null;
   private mechanicalGain: GainNode | null = null;
   private noiseBuffer: AudioBuffer | null = null;
+  private saturation: WaveShaperNode | null = null;
   private scheduler: number | null = null;
   private nextFireTime = 0;
   private lastRpm = 0;
@@ -49,6 +50,19 @@ export class EngineAudio {
     compressor.release.value = 0.16;
     this.master.connect(compressor);
     compressor.connect(ctx.destination);
+
+    // Build the nonlinear saturation curve once. Creating an oversampled
+    // WaveShaperNode and its curve for every combustion pulse caused avoidable
+    // garbage collection and CPU spikes at high RPM.
+    this.saturation = ctx.createWaveShaper();
+    const curve = new Float32Array(256);
+    for (let i = 0; i < curve.length; i++) {
+      const x = (i * 2) / (curve.length - 1) - 1;
+      curve[i] = Math.tanh(x * 2.1);
+    }
+    this.saturation.curve = curve;
+    this.saturation.oversample = "2x";
+    this.saturation.connect(this.master);
 
     this.exhaustFilter = ctx.createBiquadFilter();
     this.exhaustFilter.type = "lowpass";
@@ -190,14 +204,6 @@ export class EngineAudio {
     resonance.Q.value = 1.1;
     resonance.gain.value = 4.5 + Math.min(load, 1) * 1.5;
 
-    const saturation = ctx.createWaveShaper();
-    const curve = new Float32Array(256);
-    for (let i = 0; i < curve.length; i++) {
-      const x = (i * 2) / (curve.length - 1) - 1;
-      curve[i] = Math.tanh(x * 2.1);
-    }
-    saturation.curve = curve;
-    saturation.oversample = "2x";
     const env = ctx.createGain();
     env.gain.setValueAtTime(0.0001, at);
     env.gain.exponentialRampToValueAtTime(0.25 * strength, at + 0.0035);
@@ -205,9 +211,8 @@ export class EngineAudio {
     transient.connect(low);
     low.connect(high);
     high.connect(resonance);
-    resonance.connect(saturation);
-    saturation.connect(env);
-    env.connect(this.master);
+    resonance.connect(env);
+    env.connect(this.saturation ?? this.master);
     transient.start(at);
     transient.stop(at + 0.24);
 
@@ -256,5 +261,6 @@ export class EngineAudio {
     this.intakeFilter = null;
     this.mechanicalGain = null;
     this.noiseBuffer = null;
+    this.saturation = null;
   }
 }
