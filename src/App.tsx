@@ -145,12 +145,12 @@ export default function App() {
 
         <div className="control-group">
           <div className="control-heading"><label htmlFor="throttle">Acelerador</label><strong>{Math.round(controls.throttle * 100)}<small>%</small></strong></div>
-          <input id="throttle" className="range throttle" type="range" min="0" max="1" step="0.01" value={controls.throttle} onChange={(e) => patchControls({ throttle: Number(e.target.value) })} style={{ "--range-progress": (controls.throttle * 100) + "%" } as CSSProperties} />
+          <input id="throttle" className="range throttle" type="range" min="0" max="1" step="0.01" value={controls.throttle} onChange={(e) => patchControls({ throttle: Number(e.target.value) })} style={{ "--range-progress": (controls.throttle * 100) + "%" } as CSSProperties & { "--range-progress": string }} />
           <div className="range-captions"><span>CERRADO</span><span>PLENA CARGA</span></div>
         </div>
         <div className="control-group load-group">
           <div className="control-heading"><label htmlFor="load">Carga del motor</label><strong>{Math.round(controls.load * 100)}<small>%</small></strong></div>
-          <input id="load" className="range load" type="range" min="0" max="1" step="0.01" value={controls.load} onChange={(e) => patchControls({ load: Number(e.target.value) })} style={{ "--range-progress": (controls.load * 100) + "%" } as CSSProperties} />
+          <input id="load" className="range load" type="range" min="0" max="1" step="0.01" value={controls.load} onChange={(e) => patchControls({ load: Number(e.target.value) })} style={{ "--range-progress": (controls.load * 100) + "%" } as CSSProperties & { "--range-progress": string }} />
           <div className="range-captions"><span>SIN CARGA</span><span>ALTA CARGA</span></div>
         </div>
 
